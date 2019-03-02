@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>航空写真上で標本を見てみよう！</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Design Bootstrap -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.4/css/mdb.min.css" rel="stylesheet">
+  <script src="//code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+
+</head>
+<body>
+<p>ジャパンサーチSPARQLエンドポイント利活用例</p>
+<p><span class="label label-default">調べたい標本のキーワードを入れてください(例：ミカン、イチゴ、コオロギ　etc...)</span></p>
+<input id="title" value="コオロギ"/>
+<button class="btn btn-default" onclick="demo()">検索</button>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+   integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+   crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ==" crossorigin="">
+  <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js" integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw==" crossorigin=""></script>
+  <link rel="stylesheet" href="https://leaflet.github.io/Leaflet.markercluster/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://leaflet.github.io/Leaflet.markercluster/dist/MarkerCluster.Default.css">
+  <script src="https://leaflet.github.io/Leaflet.markercluster/dist/leaflet.markercluster-src.js"></script>
+  <script src="https://leaflet.github.io/Leaflet.markercluster/example/realworld.388.js"></script>
+
+
+<div id="mapid" style="width: 100%; height: 800px;"></div>
+<script>
+    
+    var pale = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png',
+            {id: 'palemap', attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院</a>"}),
+        seamless = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',
+            {id: 'seamlessmap', attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院</a>"}),
+        gazo5 = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/ort/{z}/{x}/{y}.jpg',
+            {id: 'gazo5map', attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院</a>"}),
+        gazo4 = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/gazo4/{z}/{x}/{y}.jpg',
+            {id: 'gazo4map', attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院</a>"}),
+        gazo3 = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/gazo3/{z}/{x}/{y}.jpg',
+            {id: 'gazo3map', attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院</a>"}),
+        gazo2 = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/gazo2/{z}/{x}/{y}.jpg',
+            {id: 'gazo2map', attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院</a>"}),
+        gazo1 = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/gazo1/{z}/{x}/{y}.jpg',
+            {id: 'gazo1map', attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院</a>"});
+        old2 = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/ort_USA10/{z}/{x}/{y}.png',
+            {id: 'ort_USA10map', attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院</a>"});
+    var baseMaps = { 
+        "航空写真(全国最新写真)" : seamless,
+        "淡色地図" : pale
+    }
+    var overMaps = { 
+        "電子国土基本図(2007年以降撮影)" : gazo5,
+        "国土画像情報(1988～1990年撮影)" : gazo4,
+        "国土画像情報(1984～1986年撮影)" : gazo3,
+        "国土画像情報(1979～1983年撮影)" : gazo2,
+        "国土画像情報(1974～1978年撮影)" : gazo1,
+        "国土画像情報(1945～1950年撮影)" : old2,
+    }
+    var overarray=[2010,1989,1985,1981,1976,1947];
+    var overmaparray=[gazo5,gazo4,gazo3,gazo2,gazo1,old2];
+    var mymap = L.map('mapid',{
+                            layers: [seamless]
+                        }).setView([36.69,139.69], 5);
+    L.control.layers(baseMaps,overMaps, {position: 'topleft', collapsed: false}).addTo(mymap); 
+    function calcmap(year){
+        //console.log(year);
+        var len = overarray.length;
+        var indices = new Array(len);
+        var sortarray=[];
+        for (var i = 0; i < len; ++i){
+            indices[i] = i;
+            sortarray.push(Math.abs(overarray[i]-year));
+            if(mymap.hasLayer(overmaparray[i])) {
+                mymap.removeLayer(overmaparray[i]);
+            }
+        }
+        indices.sort(function (a, b) { return sortarray[a] < sortarray[b] ? -1 : sortarray[a] > sortarray[b] ? 1 : 0; });
+        console.log(indices);
+        mymap.addLayer(overmaparray[indices[0]]);
+        //indices.reverse(); 
+        /*for (var i = 0; i < len; ++i){
+            mymap.addLayer(overmaparray[indices[i]]);
+        }*/
+        
+    }
+    var markers = L.markerClusterGroup();
+    function maptest(title){
+        markers.clearLayers();
+        mymap.setView([36.69,139.69], 5);
+        var query =  "PREFIX jps: <https://jpsearch.go.jp/term/property#> ";
+            query += " PREFIX schema: <http://schema.org/> ";
+            query += " PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
+            query += " PREFIX type: <https://jpsearch.go.jp/term/type/> ";
+            query += " SELECT ?s ?label ?lat ?long ?desc ";
+            query += " WHERE { ";
+            query += " ?s rdfs:label ?label ;  a/rdfs:subClassOf? type:標本. ";
+            query += " ?s jps:spatial ?place . ";
+            query += " ?place schema:geo [schema:latitude ?lat; schema:longitude ?long ]. ";
+            query += " ?s schema:description ?value. ";
+            query += " FILTER(bif:contains(?value, \"\'"+title+"\'\")). ";
+            query += " ?s schema:description ?desc. ";
+            query += " FILTER(bif:contains(?desc, 'StartDateCollected')). ";
+            query += " ?s jps:sourceInfo ?source. ";
+            query += " } LIMIT 500";
+        
+        $.ajax({
+            url:"https://jpsearch.go.jp/rdf/sparql",
+            type:'GET',
+            timeout:10000,
+            data:{
+              query : query,
+              format : "json"
+            }
+        }).then(function(data){
+            var result = data.results.bindings;
+            
+            var items = new Array();
+            var mlat = 0;
+            var mlong = 0;
+            var set = new Array();
+            for (var i = 0; i < result.length; i++) {
+                var obj = result[i];
+                var s = obj.s.value;
+                var title = obj.label.value; 
+                //console.log(title);
+                var year=2019;
+                if(obj.desc.value.match(/[0-9]+/)){
+                    var yearstr=obj.desc.value.match(/[0-9]+/)[0];
+                    //console.log(yearstr);
+                    year=parseInt(yearstr.substr(0, 4),10);
+                }
+                /*var len = overarray.length;
+                var indices = new Array(len);
+                var sortarray=[];
+                for (var i = 0; i < len; ++i){
+                    indices[i] = i;
+                    sortarray.push(Math.abs(overarray[i]-year));
+                }
+                indices.sort(function (a, b) { return sortarray[a] < sortarray[b] ? -1 : sortarray[a] > sortarray[b] ? 1 : 0; });*/
+                var url = s.replace("data","item");
+                var marker = L.marker(new L.LatLng(obj.lat.value, obj.long.value), { title: title });
+                var desc=obj.desc.value.replace("[StartDateCollected]","");
+                mlat += Number(obj.lat.value);
+                mlong += Number(obj.long.value);
+                
+                var contents = '<div>';
+                contents += '<h5 class="mt-0">'+title+'</h5>';
+                contents += '<h6 class="mt-0">'+desc+'</h6>';
+                contents += "<p><a class='btn btn-primary' href='"+url+"' target='_blank'>ジャパンサーチで標本を見る</a></br>";
+                contents += "<a class='btn btn-secondary' href='https://ja.wikipedia.org/wiki/"+title+"' target='_blank'>ウィキペディアで調べる</a></br>";
+                contents += "<input type='button' class='btn btn-primary' value='記録日時に近い航空写真を見る' onclick='calcmap("+year+");'/></p>";
+                contents += '</div>';
+                marker.bindPopup(contents).on('click', clickZoom);
+                markers.addLayer(marker);
+            }
+            mymap.addLayer(markers);
+            var popup = L.popup();
+            function onMapClick(e) {
+                popup
+                .setContent("You clicked the map at " + e.latlng.toString())
+                .openOn(mymap);
+            }
+            function clickZoom(e) {
+                mymap.setView(e.target.getLatLng(),14);
+            }
+            mymap.on('click', onMapClick);
+            mymap.panTo(new L.LatLng(mlat / result.length, mlong / result.length));
+    })
+    
+        /*var mymap = L.map('mapid').setView([36.69,139.69], 5);
+        L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html' target='_blank'>国土地理院タイル</a>",
+            id: 'mapbox.streets'
+        }).addTo(mymap);
+        $.getJSON(query, function(res){
+            console.log(res);
+            res.results.bindings.forEach(function(bind){
+            var marker = L.marker([bind.lat.value, bind.long.value]).addTo(mymap);
+            marker.bindPopup("<a href='"+bind.s.value+"'>" + bind.label.value +"</br>"+bind.desc.value+"</a>");
+            });
+        });*/
+    }
+    function demo(){
+	maptest( document.getElementById("title").value);
+    }
+</script>
+</body>
+</html>
