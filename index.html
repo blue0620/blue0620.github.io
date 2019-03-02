@@ -18,7 +18,7 @@
 </head>
 <body>
 <p>ジャパンサーチSPARQLエンドポイント利活用例</p>
-<p><span class="label label-default">調べたい標本の和名を入れてください(例：ミカン、イチゴ、コオロギ　etc...)</span></p>
+<p><span class="label label-default">調べたい標本のキーワードを入れてください(例：ミカン、イチゴ、コオロギ　etc...)</span></p>
 <input id="title" value="コオロギ"/>
 <button class="btn btn-default" onclick="demo()">検索</button>
 
@@ -54,16 +54,16 @@
         old2 = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/ort_USA10/{z}/{x}/{y}.png',
             {id: 'ort_USA10map', attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院</a>"});
     var baseMaps = { 
-        "航空写真" : seamless,
+        "航空写真(全国最新写真)" : seamless,
         "淡色地図" : pale
     }
     var overMaps = { 
-        "2007年以降撮影"   : gazo5,
-        "1988～1990年撮影" : gazo4,
-        "1984～1986年撮影" : gazo3,
-        "1979～1983年撮影" : gazo2,
-        "1974～1978年撮影" : gazo1,
-        "1945～1950年撮影" : old2,
+        "電子国土基本図(2007年以降撮影)" : gazo5,
+        "国土画像情報(1988～1990年撮影)" : gazo4,
+        "国土画像情報(1984～1986年撮影)" : gazo3,
+        "国土画像情報(1979～1983年撮影)" : gazo2,
+        "国土画像情報(1974～1978年撮影)" : gazo1,
+        "国土画像情報(1945～1950年撮影)" : old2,
     }
     var overarray=[2010,1989,1985,1981,1976,1947];
     var overmaparray=[gazo5,gazo4,gazo3,gazo2,gazo1,old2];
