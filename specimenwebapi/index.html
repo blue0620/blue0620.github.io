@@ -122,18 +122,10 @@
                     //console.log(yearstr);
                     year=parseInt(yearstr.substr(0, 4),10);
                 }
-                /*var len = overarray.length;
-                var indices = new Array(len);
-                var sortarray=[];
-                for (var i = 0; i < len; ++i){
-                    indices[i] = i;
-                    sortarray.push(Math.abs(overarray[i]-year));
-                }
-                indices.sort(function (a, b) { return sortarray[a] < sortarray[b] ? -1 : sortarray[a] > sortarray[b] ? 1 : 0; });*/
-                var url = s.replace("data","item");
+                                var url = s.replace("data","item");
                 var marker = L.marker(new L.LatLng(obj.common.coordinates.lat, obj.common.coordinates.lon), { title: title });
                 //console.log(marker);
-								var desc=obj["s_net-43-s"];
+								var desc="記録年月日	:"+obj["s_net-43-s"];
                 mlat += Number(obj.common.coordinates.lat);
                 mlong += Number(obj.common.coordinates.lon);
                 
@@ -160,21 +152,7 @@
             }
             mymap.on('click', onMapClick);
             mymap.panTo(new L.LatLng(mlat / result.length, mlong / result.length));
-    })
-    
-        /*var mymap = L.map('mapid').setView([36.69,139.69], 5);
-        L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
-            maxZoom: 18,
-            attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html' target='_blank'>国土地理院タイル</a>",
-            id: 'mapbox.streets'
-        }).addTo(mymap);
-        $.getJSON(query, function(res){
-            console.log(res);
-            res.results.bindings.forEach(function(bind){
-            var marker = L.marker([bind.lat.value, bind.long.value]).addTo(mymap);
-            marker.bindPopup("<a href='"+bind.s.value+"'>" + bind.label.value +"</br>"+bind.desc.value+"</a>");
-            });
-        });*/
+    		})
     }
     function demo(){
 	maptest( document.getElementById("title").value);
