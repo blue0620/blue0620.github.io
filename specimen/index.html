@@ -85,11 +85,6 @@
         indices.sort(function (a, b) { return sortarray[a] < sortarray[b] ? -1 : sortarray[a] > sortarray[b] ? 1 : 0; });
         console.log(indices);
         mymap.addLayer(overmaparray[indices[0]]);
-        //indices.reverse(); 
-        /*for (var i = 0; i < len; ++i){
-            mymap.addLayer(overmaparray[indices[i]]);
-        }*/
-        
     }
     var markers = L.markerClusterGroup();
     function maptest(title){

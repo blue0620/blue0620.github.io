@@ -68,10 +68,9 @@
     var overmaparray=[gazo5,gazo4,gazo3,gazo2,gazo1,old2];
     var mymap = L.map('mapid',{
                             layers: [seamless]
-                        }).setView([36.69,139.69], 5);
+                        }).setView([36.69,139.69], 5);//表示される地図の位置を決める
     L.control.layers(baseMaps,overMaps, {position: 'topleft', collapsed: false}).addTo(mymap); 
-    function calcmap(year){
-        //console.log(year);
+    function calcmap(year){//クリックされた標本の採集された年(year)に撮影時期の近いマップを上書きする。
         var len = overarray.length;
         var indices = new Array(len);
         var sortarray=[];
@@ -85,50 +84,39 @@
         indices.sort(function (a, b) { return sortarray[a] < sortarray[b] ? -1 : sortarray[a] > sortarray[b] ? 1 : 0; });
         console.log(indices);
         mymap.addLayer(overmaparray[indices[0]]);
-        //indices.reverse(); 
-        /*for (var i = 0; i < len; ++i){
-            mymap.addLayer(overmaparray[indices[i]]);
-        }*/
-        
     }
     var markers = L.markerClusterGroup();
-    function maptest(title){
+
+    function maptest(title){//ユーザが検索フォームに入力した内容を
         markers.clearLayers();
-        mymap.setView([36.69,139.69], 5);
+        mymap.setView([36.69,139.69], 5);//検索時に地図の表示位置を初期化する。
         $.ajax({
             url:"https://jpsearch.go.jp/api/item/search/s_net-default",
             type:'GET',
             data:{
               keyword : title,
               format : "json",
-							size: "500"
+			  size: "500"
             }
         }).then(function(data){
             var result = data.list;
-            //console.log(result);
             var items = new Array();
-            var mlat = 0;
-            var mlong = 0;
+            var mlat = 0;//leafletの地図表示範囲を決めるために検索結果の緯度の和をとってる
+            var mlong = 0;//leafletの地図表示範囲を決めるために検索結果の経度の和をとってる
             var set = new Array();
             for (var i = 0; i < result.length; i++) {
                 var obj = result[i];
                 var s = "https://jpsearch.go.jp/item/"+obj.id;
-                var title = obj.common.title; 
-                //console.log(s);
-                var year=2019;
-								if(!obj["s_net-43-s"]||!obj.common.coordinates)continue;
-                if(obj["s_net-43-s"].match(/[0-9]+/)){
-                    var yearstr=obj["s_net-43-s"].match(/[0-9]+/)[0];
-                    //console.log(yearstr);
-                    year=parseInt(yearstr.substr(0, 4),10);
-                }
-                                var url = s.replace("data","item");
+                var title = obj.common.title; //検索結果のタイトルを表示する
+				if(!obj["s_net-43-s"]||!obj.common.coordinates||!obj["s_net-43-s"].match(/[0-9]+/))continue;
+                var yearstr=obj["s_net-43-s"].match(/[0-9]+/)[0];
+                var year=parseInt(yearstr.substr(0, 4),10);//記録年月日を取得する
+                var url = s;
                 var marker = L.marker(new L.LatLng(obj.common.coordinates.lat, obj.common.coordinates.lon), { title: title });
-                //console.log(marker);
-								var desc="記録年月日	:"+obj["s_net-43-s"];
+				var desc="記録年月日	:"+obj["s_net-43-s"];
                 mlat += Number(obj.common.coordinates.lat);
                 mlong += Number(obj.common.coordinates.lon);
-                
+				//標本のマーカーをクリックしたとき表示されるコンテンツを作る
                 var contents = '<div>';
                 contents += '<h5 class="mt-0">'+title+'</h5>';
                 contents += '<h6 class="mt-0">'+desc+'</h6>';
@@ -136,7 +124,8 @@
                 contents += "<a class='btn btn-secondary' href='https://ja.wikipedia.org/wiki/"+title+"' target='_blank'>ウィキペディアで調べる</a></br>";
                 contents += "<input type='button' class='btn btn-primary' value='記録日時に近い航空写真を見る' onclick='calcmap("+year+");'/></p>";
                 contents += '</div>';
-                //console.log(contents);
+				
+				//作ったコンテンツを地図に登録する。
                 marker.bindPopup(contents).on('click', clickZoom);
                 markers.addLayer(marker);
             }
@@ -147,15 +136,15 @@
                 .setContent("You clicked the map at " + e.latlng.toString())
                 .openOn(mymap);
             }
-            function clickZoom(e) {
+            function clickZoom(e) {//クリックした際のズーム倍率を決める
                 mymap.setView(e.target.getLatLng(),14);
             }
             mymap.on('click', onMapClick);
-            mymap.panTo(new L.LatLng(mlat / result.length, mlong / result.length));
-    		})
+            mymap.panTo(new L.LatLng(mlat / result.length, mlong / result.length));//表示位置を決める
+    	})
     }
     function demo(){
-	maptest( document.getElementById("title").value);
+		maptest( document.getElementById("title").value);//ユーザが検索フォームに入力した内容を取得してmaptest関数に渡す。
     }
 </script>
 </body>
